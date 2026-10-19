@@ -1,5 +1,7 @@
 # Snake
 
+[![CI](https://github.com/Yooo1206/snake/actions/workflows/ci.yml/badge.svg)](https://github.com/Yooo1206/snake/actions/workflows/ci.yml)
+
 **A precise, dependency-free Snake game.** No build step, no frameworks, no tracking — one `index.html` and six small modules.
 
 [**▶ Play it live**](https://yooo1206.github.io/snake/) · [Report a bug](../../issues)
@@ -27,7 +29,7 @@ Most browser Snake games are a canvas and a `setInterval`. This one is built lik
 | 💾 **Persistence** | Best score in `localStorage` |
 | 📱 **Responsive** | Fills any viewport, safe-area aware |
 | ♿ **Accessibility** | Keyboard-only play, visible focus, `prefers-reduced-motion` respected |
-| 🧪 **Tests** | 12 unit tests, zero dependencies |
+| 🧪 **Tests** | 17 unit tests, zero dependencies |
 | 📦 **Zero runtime deps** | No npm install required to play |
 
 ## Play locally
@@ -65,8 +67,10 @@ js/game.js          pure rules: movement, collision, growth, scoring
 js/renderer.js      canvas drawing, interpolation, particles, shake
 js/audio.js         WebAudio synthesis with a lazy AudioContext
 js/input.js         keyboard + swipe, with cleanup
-js/main.js          glue: fixed-timestep loop, HUD, overlays
+js/timestep.js      fixed-timestep accumulator, unit-tested
+js/main.js          glue: loop, HUD, overlays
 test/game.test.js   12 tests against the pure state machine
+test/timestep.test.js 5 tests for the accumulator
 ```
 
 ### The loop

@@ -3,6 +3,7 @@ import { SnakeGame } from './game.js';
 import { Renderer } from './renderer.js';
 import { Sound } from './audio.js';
 import { bindInput } from './input.js';
+import { advance } from './timestep.js';
 
 const canvas = document.getElementById('game');
 const ui = {
@@ -151,18 +152,16 @@ function frame(now) {
   lastTime = now;
 
   if (game.status === 'running') {
-    accumulator += dt;
-    let guard = 0;
+    const result = advance(accumulator, dt, game.interval);
+    accumulator = result.accumulator;
 
-    while (accumulator >= game.interval && game.status === 'running' && guard < 5) {
-      accumulator -= game.interval;
+    for (let step = 0; step < result.steps && game.status === 'running'; step += 1) {
       game.step();
       consumeEvents();
-      guard += 1;
     }
 
     if (game.status === 'running') {
-      alpha = Math.min(accumulator / game.interval, 1);
+      alpha = Math.min(accumulator / (game.interval / 1000), 1);
     }
   }
 
