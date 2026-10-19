@@ -1,0 +1,12 @@
+{
+  "name": "snake",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A precise, dependency-free Snake game with keyboard, touch and offline support.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test",
+    "serve": "python -m http.server 8123"
+  }
+}

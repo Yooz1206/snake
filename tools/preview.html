@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Snake · preview</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Screenshot harness: hides chrome that would distract from the board. */
+    body { padding: 0; }
+    .app { width: 520px; }
+    .overlay { display: none; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hud">
+      <div class="hud__stat"><span class="hud__label">Score</span><span class="hud__value" id="score">240</span></div>
+      <div class="hud__brand" aria-hidden="true">SNAKE</div>
+      <div class="hud__stat hud__stat--end"><span class="hud__label">Best</span><span class="hud__value" id="best">380</span></div>
+    </header>
+    <section class="stage">
+      <canvas id="game" width="640" height="640"></canvas>
+    </section>
+    <footer class="foot">
+      <button class="icon-btn" aria-label="sound">🔊</button>
+      <span class="foot__hint">空格 暂停 · R 重开</span>
+    </footer>
+  </main>
+
+  <script>
+    const reportError = (message) => {
+      const pre = document.createElement('pre');
+      pre.textContent = 'ERR: ' + message;
+      pre.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#b00020;color:#fff;z-index:9;padding:10px;font-size:12px;white-space:pre-wrap';
+      document.body.appendChild(pre);
+    };
+    window.addEventListener('error', (event) => reportError(`${event.message} @ ${event.filename}:${event.lineno}`));
+    window.addEventListener('unhandledrejection', (event) => reportError(String(event.reason)));
+  </script>
+  <script type="module">
+    import { CONFIG } from '../js/config.js';
+    import { SnakeGame } from '../js/game.js';
+    import { Renderer } from '../js/renderer.js';
+
+    const game = new SnakeGame(CONFIG);
+    game.status = 'running';
+    game.score = 240;
+    game.eaten = 6;
+
+    game.snake = [
+      { x: 15, y: 9 }, { x: 14, y: 9 }, { x: 13, y: 9 }, { x: 12, y: 9 },
+      { x: 11, y: 9 }, { x: 10, y: 9 }, { x: 10, y: 10 }, { x: 10, y: 11 },
+      { x: 11, y: 11 }, { x: 12, y: 11 }, { x: 13, y: 11 }, { x: 14, y: 11 },
+      { x: 15, y: 11 }, { x: 16, y: 11 },
+    ];
+    game.prevSnake = game.snake.map((segment) => ({ ...segment }));
+    game.direction = { x: 1, y: 0 };
+    game.food = { x: 18, y: 8 };
+
+    const renderer = new Renderer(document.getElementById('game'), CONFIG);
+    const draw = (now) => {
+      renderer.render(game, 0, now / 1000);
+      requestAnimationFrame(draw);
+    };
+    requestAnimationFrame(draw);
+  </script>
+</body>
+</html>

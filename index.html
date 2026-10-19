@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Snake · 贪吃蛇</title>
+  <meta name="description" content="A precise, dependency-free Snake game. 零依赖的贪吃蛇，支持键盘、触屏与离线游玩。">
+  <meta name="theme-color" content="#0a0d12">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0d12'/%3E%3Cpath d='M18 42h10a7 7 0 0 0 0-14h-4' stroke='%237cffb2' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='44' cy='42' r='5' fill='%23ff8a5b'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="hud">
+      <div class="hud__stat">
+        <span class="hud__label">Score</span>
+        <span class="hud__value" id="score">0</span>
+      </div>
+      <div class="hud__brand" aria-hidden="true">SNAKE</div>
+      <div class="hud__stat hud__stat--end">
+        <span class="hud__label">Best</span>
+        <span class="hud__value" id="best">0</span>
+      </div>
+    </header>
+
+    <section class="stage">
+      <canvas id="game" width="640" height="640" aria-label="贪吃蛇游戏区域"></canvas>
+
+      <div class="overlay" id="overlay" data-state="ready">
+        <div class="overlay__card">
+          <h1 id="ov-title">贪吃蛇</h1>
+          <p id="ov-sub">方向键 / WASD 控制，空格开始</p>
+          <button type="button" class="btn" id="ov-action">开始游戏</button>
+          <p class="overlay__hint" id="ov-hint">移动端可滑动屏幕操作</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <button type="button" class="icon-btn" id="mute" aria-label="切换音效" aria-pressed="false">🔊</button>
+      <span class="foot__hint">空格 暂停 · R 重开</span>
+    </footer>
+
+    <noscript>
+      <p class="noscript">这个游戏需要启用 JavaScript。</p>
+    </noscript>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
