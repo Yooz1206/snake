@@ -18,12 +18,14 @@ const dateKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 
 const streakDays = () => (D ? D.displayStreak(streak, today()) : 0);
 
 const E = (id) => document.getElementById(id);
+const SWIPE = '<svg viewBox="0 0 64 24" aria-hidden="true"><path d="M6 12h44" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M44 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const KEYS = '<span class="keycaps"><b>↑</b><b>←</b><b>↓</b><b>→</b></span>';
 const ui = {
   score: E('score'), best: E('best'), brand: E('brand'), overlay: E('overlay'),
   title: E('ov-title'), sub: E('ov-sub'), action: E('ov-action'), secondary: E('ov-secondary'),
   quit: E('ov-quit'), hint: E('ov-hint'), mute: E('mute'), foot: E('foot-hint'),
   live: E('live'), toast: E('toast'), count: E('countdown'), countValue: E('countdown-value'),
-  iosTip: E('ios-tip'),
+  iosTip: E('ios-tip'), guide: E('guide'),
 };
 const stage = E('stage');
 const canvas = E('game');
@@ -65,6 +67,7 @@ const set = (k, v) => { try { storage?.setItem(k, String(v)); return true; } cat
 const today = () => dateKey(new Date());
 const isTouch = () => window.matchMedia?.('(pointer: coarse)').matches ?? false;
 const isFirst = () => get(SEEN) !== '1';
+const FIRST_VISIT = isFirst();
 const seen = () => set(SEEN, '1');
 
 let mode = 'daily';
@@ -82,6 +85,7 @@ let tickShown = 0;
 let iosMod = null;
 let iosShown = false;
 let warned = false;
+let guideDone = false;
 let lastTime = performance.now();
 let acc = 0;
 let alpha = 0;
@@ -294,7 +298,7 @@ function copyFor() {
     }
     return {
       title: '贪吃蛇',
-      sub: touch ? '滑动或点按开始' : (isFirst() ? '方向键 / WASD 开始' : '方向键 / WASD 控制，空格开始'),
+      sub: touch ? '滑动或点按开始' : (FIRST_VISIT ? '方向键 / WASD 开始' : '方向键 / WASD 控制，空格开始'),
       action: '开始游戏',
       secondary: '每日挑战',
       hint: touch ? '移动端可滑动屏幕操作' : '空格 开始 · 方向键 / WASD 转向',
@@ -350,6 +354,7 @@ function paint(force = false) {
   ui.overlay.dataset.state = game.status;
 
   if (!visible) {
+    ui.guide.hidden = true;
     if (game.status === 'countdown') showCount();
     return;
   }
@@ -361,6 +366,9 @@ function paint(force = false) {
   setBtn(ui.secondary, copy.secondary);
   setBtn(ui.quit, copy.extra);
   ui.hint.textContent = copy.hint;
+  const guide = FIRST_VISIT && !guideDone && game.status === 'ready';
+  ui.guide.hidden = !guide;
+  if (guide) ui.guide.innerHTML = isTouch() ? SWIPE : KEYS;
   ui.foot.textContent = mode === 'daily'
     ? footLine(dayState.attemptsLeft, streakDays())
     : '空格 暂停 · R 重开';
@@ -388,6 +396,7 @@ function begin(which = mode) {
   }
 
   seen();
+  guideDone = true;
   pump();
   paint(true);
 }
@@ -593,12 +602,16 @@ bindInput({
 
 ui.mute.textContent = muted ? '🔇' : '🔊';
 ui.mute.setAttribute('aria-pressed', String(muted));
-if (isFirst()) seen();
 
 import('./audio.js').then(({ Sound }) => {
   sound = new Sound();
   if (muted) sound.toggle();
-}).catch(() => {});
+}).catch(() => {
+  muted = true;
+  ui.mute.disabled = true;
+  ui.mute.setAttribute('aria-label', '音效不可用');
+  ui.mute.textContent = '🔇';
+});
 
 import('./ios.js').then((mod) => {
   iosMod = mod;

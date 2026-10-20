@@ -108,9 +108,16 @@ check('ready overlay is the daily challenge', await evaluate('document.getElemen
 check('ready line shows three attempts', await evaluate('document.getElementById("ov-sub").textContent'), (v) => /今日剩 3 次/.test(v), '今日剩 3 次');
 check('brand reads DAILY', await evaluate('document.getElementById("brand").textContent'), (v) => v === 'DAILY', 'DAILY');
 
+const guide = await evaluate(`(() => {
+  const el = document.getElementById('guide');
+  return { hidden: el.hidden, html: el.innerHTML.slice(0, 40) };
+})()`);
+check('first visit shows the control guide', guide, (v) => v.hidden === false && v.html.includes('keycaps'), 'keycaps visible');
+
 await key(' ', 'Space', 32);
 await sleep(400);
 check('space starts the run', await evaluate('document.getElementById("overlay").classList.contains("is-hidden")'), (v) => v === true, true);
+check('the guide disappears once the run starts', await evaluate('document.getElementById("guide").hidden'), (v) => v === true, true);
 
 // Auto-pause → countdown → running (R4.4/R4.6).
 await evaluate('window.dispatchEvent(new Event("blur"))');

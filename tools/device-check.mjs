@@ -121,6 +121,12 @@ check('iPhone: install hint appears after seven days',
   (v) => v === '分享 → 添加到主屏幕，离线可玩', '分享 → 添加到主屏幕，离线可玩');
 await layoutProbe('iphone15');
 
+// R5.2: a touch device gets the swipe figure, not keycaps.
+await evaluate("localStorage.removeItem('snake:seen:v1')");
+await reload();
+const swipeGuide = await evaluate('document.getElementById("guide").innerHTML.slice(0, 24)');
+check('iPhone first visit shows the swipe guide', swipeGuide, (v) => v.includes('<svg'), '<svg …>');
+
 await reload();
 check('iPhone: the hint does not repeat',
   await evaluate('document.getElementById("ios-tip").hidden'),
