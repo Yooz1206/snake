@@ -37,6 +37,10 @@ export class Renderer {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.size = size;
     this.cell = size / this.config.cols;
+    const bg = this.ctx.createRadialGradient(size / 2, size / 2, size * 0.35, size / 2, size / 2, size * 0.75);
+    bg.addColorStop(0, 'rgba(0,0,0,0)');
+    bg.addColorStop(1, 'rgba(0,0,0,0.26)');
+    this.vignetteGrad = bg;
   }
 
   burst(x, y, amount = 14) {
@@ -110,13 +114,19 @@ export class Renderer {
     const cy = (game.food.y + 0.5) * cell;
     const r = cell * 0.3 * (1 + Math.sin(time * 4) * 0.08);
 
-    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, cell * 1.4);
-    glow.addColorStop(0, this.palette.foodGlow);
-    glow.addColorStop(1, 'rgba(255,138,91,0)');
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(cx, cy, cell * 1.4, 0, Math.PI * 2);
-    ctx.fill();
+    if (!this.glowSprite) {
+      const sprite = document.createElement('canvas');
+      sprite.width = 64;
+      sprite.height = 64;
+      const g = sprite.getContext('2d');
+      const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, this.palette.foodGlow);
+      grad.addColorStop(1, 'rgba(255,138,91,0)');
+      g.fillStyle = grad;
+      g.fillRect(0, 0, 64, 64);
+      this.glowSprite = sprite;
+    }
+    ctx.drawImage(this.glowSprite, cx - cell * 1.4, cy - cell * 1.4, cell * 2.8, cell * 2.8);
 
     ctx.fillStyle = this.palette.food;
     ctx.beginPath();
@@ -168,13 +178,10 @@ export class Renderer {
   head(point, cell, direction) {
     const { ctx } = this;
     const r = cell * 0.43;
-    ctx.shadowColor = 'rgba(168,255,203,0.45)';
-    ctx.shadowBlur = cell * 0.8;
     ctx.fillStyle = this.palette.head;
     ctx.beginPath();
     ctx.arc(point.x, point.y, r, 0, Math.PI * 2);
     ctx.fill();
-    ctx.shadowBlur = 0;
 
     const fx = direction.x * r * 0.24;
     const fy = direction.y * r * 0.24;
@@ -202,10 +209,7 @@ export class Renderer {
 
   vignette() {
     const { ctx, size } = this;
-    const g = ctx.createRadialGradient(size / 2, size / 2, size * 0.35, size / 2, size / 2, size * 0.75);
-    g.addColorStop(0, 'rgba(0,0,0,0)');
-    g.addColorStop(1, 'rgba(0,0,0,0.26)');
-    ctx.fillStyle = g;
+    ctx.fillStyle = this.vignetteGrad;
     ctx.fillRect(0, 0, size, size);
   }
 }

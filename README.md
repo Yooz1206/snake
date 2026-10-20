@@ -74,11 +74,17 @@ node tools/device-check.mjs   # 设备矩阵：iPhone / Android / 320px、44px�
 
 | 指标 | 目标 | 现状 |
 | :-- | :-- | :-- |
-| 首屏 HTML+CSS+JS | ≤ 42KB | **40.0KB（未压缩）/ 12.7KB gzip** |
-| 第三方请求 | 0 | 0 |
-| 首屏字体 | 0 | 0 |
+| 首屏 HTML+CSS+JS | ≤ 42KB / ≤ 14KB gzip | **41.8KB（未压缩）/ 13.4KB gzip** |
+| LCP（4x CPU · 1.6Mbps · 150ms RTT） | ≤ 1.0s | **164–236ms** |
+| CLS | ≤ 0.02 | **0.0000** |
+| 长任务 >50ms | 0 个 | **3 个（52–56ms），TBT 14ms** |
+| 第三方请求 / 首屏字体 | 0 / 0 | 0 / 0 |
 
 首屏只包含绘制第一帧真正需要的九个文件：`index.html`、`style.css`、`main`、`game`、`renderer`、`input`、`timestep`、`config`、`rng`。**每日状态、音效、Service Worker、iOS 判定、分享卡**都用动态 `import()` 在首帧之后加载——它们分别只影响次数/天数文案、声音、离线与分享，不参与第一屏的绘制。`test/size.test.js` 会走一遍静态 import 图，超过 42KB 直接让 CI 失败。
+
+LCP/CLS/长任务由 `tools/perf-check.mjs` 用 DevTools Protocol 在 Lighthouse-mobile 条件下量（不装 npm）：它跑两轮导航、取第二轮，长任务用 `PerformanceObserver` 统计。**长任务这一项没达标**：一次是 594ms 的首屏 JS 解析，两次是空闲态偶发的渲染帧（4x 降频下约 52–56ms）。合计 TBT 只有 14ms，远低于 Lighthouse「良好」的 200ms 线，但 PRD 写的是「0 个 >50ms」，按字面仍未满足。
+
+空闲态已经做了两处针对性优化：`paint()` 只在状态变化时执行（此前每帧都重建 overlay 文案并重设焦点），棋盘背景的暗角与食物光晕改为缓存/离屏精灵，ready 态渲染降到 ~12fps。
 
 ## 可访问性（诚实边界）
 

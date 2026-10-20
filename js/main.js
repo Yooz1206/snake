@@ -18,7 +18,7 @@ const dateKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 
 const streakDays = () => (D ? D.displayStreak(streak, today()) : 0);
 
 const E = (id) => document.getElementById(id);
-const SWIPE = '<svg viewBox="0 0 64 24" aria-hidden="true"><path d="M6 12h44" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M44 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SWIPE = '<svg viewBox="0 0 64 24" aria-hidden="true"><path d="M8 12h40M42 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const KEYS = '<span class="keycaps"><b>↑</b><b>←</b><b>↓</b><b>→</b></span>';
 const ui = {
   score: E('score'), best: E('best'), brand: E('brand'), overlay: E('overlay'),
@@ -86,6 +86,7 @@ let iosMod = null;
 let iosShown = false;
 let warned = false;
 let guideDone = false;
+let lastPaint = 0;
 let lastTime = performance.now();
 let acc = 0;
 let alpha = 0;
@@ -345,8 +346,8 @@ function copyFor() {
 }
 
 function paint(force = false) {
+  if (!force && game.status === lastStatus) return;
   iosTipNow();
-  if (!force && game.status === lastStatus && game.status === 'running') return;
   lastStatus = game.status;
 
   const visible = game.status !== 'running';
@@ -503,6 +504,14 @@ function tick() {
 function frame(now) {
   const dt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
+
+  // A ready board has nothing moving behind the overlay; 12fps is plenty and
+  // keeps the main thread free (PRD 9.1: no long tasks).
+  if (game.status === 'ready' && now - lastPaint < 80) {
+    requestAnimationFrame(frame);
+    return;
+  }
+  lastPaint = now;
 
   if (game.status === 'countdown') tick();
 
