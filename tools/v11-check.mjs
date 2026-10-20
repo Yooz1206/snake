@@ -140,7 +140,7 @@ const card = await evaluate(`(async () => {
   canvas.height = 1350;
   drawCard(canvas.getContext('2d'), {
     width: 1080, height: 1350, date: '2026-10-20', best: 240,
-    streak: 3, attempt: 2, url: 'https://yooo1206.github.io/snake/?from=share',
+    streak: 3, attempt: 2, url: 'https://yooz1206.github.io/snake/?from=share',
   });
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
   return { size: blob ? blob.size : -1, data: canvas.toDataURL('image/png') };

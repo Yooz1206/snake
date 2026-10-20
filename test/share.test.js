@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { shareCopy, cardFileName, shareResult } from '../js/share.js';
 
-const URL = 'https://yooo1206.github.io/snake/?from=share';
+const URL = 'https://yooz1206.github.io/snake/?from=share';
 
 test('the copy line carries the score, streak and link but never the seed', () => {
   const copy = shareCopy({ date: '2026-10-20', best: 240, streak: 3, url: URL });

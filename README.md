@@ -1,10 +1,10 @@
 # Snake · 每日一局
 
-[![CI](https://github.com/Yooo1206/snake/actions/workflows/ci.yml/badge.svg)](https://github.com/Yooo1206/snake/actions/workflows/ci.yml)
+[![CI](https://github.com/Yooz1206/snake/actions/workflows/ci.yml/badge.svg)](https://github.com/Yooz1206/snake/actions/workflows/ci.yml)
 
 **零依赖的贪吃蛇，每天一局。** 没有构建步骤、没有框架、没有追踪——每天同一开局、三次机会、一键生成战绩卡，装到主屏幕后可离线游玩。
 
-[**▶ 在线试玩**](https://yooo1206.github.io/snake/) · [PRD](docs/superpowers/specs/2026-10-20-snake-v1.1-prd.md) · [实施计划](docs/superpowers/plans/2026-10-20-snake-v1.1.md)
+[**▶ 在线试玩**](https://yooz1206.github.io/snake/) · [PRD](docs/superpowers/specs/2026-10-20-snake-v1.1-prd.md) · [实施计划](docs/superpowers/plans/2026-10-20-snake-v1.1.md)
 
 ---
 
@@ -111,4 +111,4 @@ python -m http.server 8123
 
 ## License
 
-[MIT](LICENSE) © 2026 Yooo1206
+[MIT](LICENSE) © 2026 Yooz1206
