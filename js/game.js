@@ -124,10 +124,10 @@ export class SnakeGame {
   }
 
   /** End the run deliberately; the caller decides how to settle the score. */
-  quit() {
+  quit(reason = 'quit') {
     if (this.status === 'ready' || this.status === 'over' || this.status === 'won') return;
     this.status = 'over';
-    this.events.push({ type: 'die', reason: 'quit' });
+    this.events.push({ type: 'die', reason });
   }
 
   /**

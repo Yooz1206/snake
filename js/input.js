@@ -11,12 +11,22 @@ const KEY_TO_DIRECTION = {
 
 const SWIPE_THRESHOLD = 24;
 
+/** A focused control already handles Space/Enter itself (R4.7). */
+function isFormControl(target) {
+  if (!target || typeof target !== 'object') return false;
+  return target.tagName === 'BUTTON'
+    || target.tagName === 'INPUT'
+    || target.tagName === 'TEXTAREA'
+    || target.tagName === 'SELECT'
+    || target.isContentEditable === true;
+}
+
 /**
  * Wire keyboard, pointer and swipe input to game actions.
  * Returns a cleanup function.
  *
  * @param {{
- *   canvas: HTMLCanvasElement,
+ *   canvas: HTMLElement,
  *   onDirection: (direction: string) => void,
  *   onPrimary: () => void,
  *   onRestart: () => void,
@@ -35,6 +45,9 @@ export function bindInput({ canvas, onDirection, onPrimary, onRestart, onMute })
     }
 
     if (event.code === 'Space') {
+      // Let a focused button fire its own click; otherwise one press would
+      // run the action twice.
+      if (isFormControl(event.target)) return;
       event.preventDefault();
       onPrimary();
       return;

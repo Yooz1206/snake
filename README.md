@@ -1,118 +1,98 @@
-# Snake
+# Snake · 每日一局
 
 [![CI](https://github.com/Yooo1206/snake/actions/workflows/ci.yml/badge.svg)](https://github.com/Yooo1206/snake/actions/workflows/ci.yml)
 
-**A precise, dependency-free Snake game.** No build step, no frameworks, no tracking — one `index.html` and six small modules.
+**零依赖的贪吃蛇，每天一局。** 没有构建步骤、没有框架、没有追踪——每天同一开局、三次机会、一键生成战绩卡，装到主屏幕后可离线游玩。
 
-[**▶ Play it live**](https://yooo1206.github.io/snake/) · [Report a bug](../../issues)
-
-![Gameplay preview](docs/preview.png)
+[**▶ 在线试玩**](https://yooo1206.github.io/snake/) · [PRD](docs/superpowers/specs/2026-10-20-snake-v1.1-prd.md) · [实施计划](docs/superpowers/plans/2026-10-20-snake-v1.1.md)
 
 ---
 
-## Why this exists
+## 玩什么
 
-Most browser Snake games are a canvas and a `setInterval`. This one is built like production software:
+| 模式 | 随机性 | 记录 | 分享 |
+| :-- | :-- | :-- | :-- |
+| **每日挑战** | 日期种子（同一天所有人同一开局） | 今日最佳、剩余次数、连续天数 | 生成 1080×1350 战绩卡 |
+| **练习模式** | `Math.random()` | 仅历史最高分 | 不生成每日卡 |
 
-- **The rules are a pure state machine.** `js/game.js` knows nothing about the DOM, so it is fully unit-tested.
-- **The loop is fixed-timestep with interpolated rendering.** Speed changes never desync the simulation, and motion is smooth at any refresh rate.
-- **Input is buffered.** Two turns can be queued, so a fast double-tap never gets swallowed.
+规则：每天 3 次机会；次数用完前每天可重开；连续天数只在当日得分 ≥10 时结算；得分 <10 既不计入也不清零。
 
-## Features
+## 为什么它不像一个 `setInterval` 玩具
 
-| | |
-| :-- | :-- |
-| 🎮 **Controls** | Arrow keys, WASD, swipe on touch devices |
-| 🧠 **Input buffer** | Up to 2 queued turns, reversals rejected |
-| ✨ **Rendering** | DPR-aware canvas, interpolated movement, particles, screen shake |
-| 🔊 **Audio** | Procedurally synthesised with WebAudio — no asset files |
-| 💾 **Persistence** | Best score in `localStorage` |
-| 📱 **Responsive** | Fills any viewport, safe-area aware |
-| ♿ **Accessibility** | Keyboard-only play, visible focus, `prefers-reduced-motion` respected |
-| 🧪 **Tests** | 17 unit tests, zero dependencies |
-| 📦 **Zero runtime deps** | No npm install required to play |
+- **规则与渲染分离**：`js/game.js` 是纯状态机，不碰 DOM、不读时钟、不用 `Math.random`——随机源由外部注入，所以每日挑战可以复现。
+- **固定步长 + 插值渲染**：逻辑按整格推进，画面在两格之间插值；加速不会让模拟跑偏。
+- **输入缓冲**：最多缓存两次转向，反向输入被拒绝，疯狂连按不会自缠。
+- **状态机完整**：`ready → running ⇄ paused → countdown → running`，另有 `over` 与 `won`；自动暂停恢复走 3-2-1，倒计时期间输入被忽略且不会死亡。
 
-## Play locally
+## 操作
 
-ES modules cannot be loaded from `file://`, so serve the folder:
+| 动作 | 键盘 | 触屏 |
+| :-- | :-- | :-- |
+| 转向 / 开始 | `↑ ↓ ← →` 或 `W A S D` | 滑动 |
+| 开始 / 暂停 / 继续 | `空格` | 点按棋盘 |
+| 重开（练习） | `R` 两次，2 秒内 | — |
+| 静音 | `M` | 页脚按钮 |
+
+每日模式里 `R` 只会暂停，不会重开——要开新的一局得先「结束本局」，因为每局都要扣一次机会。
+
+## 架构
+
+```
+index.html             结构、overlay、aria-live 区域
+manifest.webmanifest   PWA 元数据（192 / 512 / maskable）
+sw.js                  预缓存、导航 network-first、静态 cache-first
+css/style.css          布局、视觉令牌、44px 触控目标
+js/config.js           所有可调参数（棋盘、速度、次数、倒计时、缓存名）
+js/game.js             纯规则：移动、碰撞、生长、计分、胜利、倒计时、重开保护
+js/rng.js              FNV-1a32 + mulberry32，日期种子
+js/daily.js            每日状态、次数、连续天数、7 天清理、损坏恢复
+js/copy.js             界面文案（对照 PRD §8.2）
+js/controls.js         失焦防抖、倒计时次数上限、倒计时数值
+js/share.js            战绩卡绘制 + Web Share / 下载 / 复制（动态加载）
+js/pwa.js              SW 注册、更新提示、?sw=off
+js/renderer.js         canvas 绘制、插值、粒子、震屏
+js/audio.js            WebAudio 合成音效
+js/input.js            键盘 + 滑动，空格去重
+js/timestep.js         固定步长累加器
+js/main.js             胶水层：循环、HUD、模式、overlay
+```
+
+## 测试
+
+```bash
+node --test              # 62 项：单元 + 尺寸预算
+python -m http.server 8123
+node tools/cdp-check.mjs # 真浏览器冒烟（需 Chrome 以 --remote-debugging-port=9333 启动）
+```
+
+单测覆盖：种子确定性、同种子同输入逐步一致、不同日期分叉、次数扣减与钳制、连续天数四种情况、损坏 JSON 恢复、7 天清理、`won` 状态、倒计时期间不推进、重开保护两次按压、分享文案与降级链、对比度 ≥4.5:1、首屏体积。
+
+## 性能
+
+| 指标 | 目标 | 现状 |
+| :-- | :-- | :-- |
+| 首屏 HTML+CSS+JS | ≤ 42KB | **66KB（未压缩）/ 20KB gzip**——未达标，见下 |
+| 第三方请求 | 0 | 0 |
+| 首屏字体 | 0 | 0 |
+
+首屏超预算 24KB：v1.0 基线 29.8KB，v1.1 新增 7 个模块后为 66KB。`test/size.test.js` 里这条 PRD 断言以 `todo` 标记（不阻断 CI），另有 72KB 回归上限防止继续增长。要真正回到 42KB，需要压缩 `main.js`/`daily.js` 的体量或把每日状态加载移出首屏——这是 v1.1 的已知缺口，不是已解决的问题。
+
+## 可访问性（诚实边界）
+
+做到：小字对比度 ≥4.5:1（`--muted` 已改为 `#7a8796`）、所有可点元素 ≥44×44、仅键盘可完成开始/暂停/继续/重开/静音、焦点可见、`aria-live` 播报开始/破纪录/结束/剩余次数、`prefers-reduced-motion` 全面生效。
+
+**不承诺**：贪吃蛇是空间视觉游戏，v1.1 不做「屏幕阅读器完整可玩」。承诺的是状态可听、流程可键盘完成、对比度与触控达标。
+
+## 本地运行
+
+ES 模块不能从 `file://` 加载，起一个静态服务器即可：
 
 ```bash
 python -m http.server 8123
-# then open http://127.0.0.1:8123
+# 打开 http://127.0.0.1:8123
 ```
 
-Or with Node:
-
-```bash
-npx serve .
-```
-
-## Controls
-
-| Action | Keys |
-| :-- | :-- |
-| Move | `↑` `↓` `←` `→` or `W` `A` `S` `D` |
-| Start / pause | `Space` |
-| Restart | `R` |
-| Mute | `M` |
-| Move (touch) | Swipe on the board |
-
-## Architecture
-
-```
-index.html          markup and overlays
-css/style.css       layout, typography, responsive rules
-js/config.js        every tunable number in one frozen object
-js/game.js          pure rules: movement, collision, growth, scoring
-js/renderer.js      canvas drawing, interpolation, particles, shake
-js/audio.js         WebAudio synthesis with a lazy AudioContext
-js/input.js         keyboard + swipe, with cleanup
-js/timestep.js      fixed-timestep accumulator, unit-tested
-js/main.js          glue: loop, HUD, overlays
-test/game.test.js   12 tests against the pure state machine
-test/timestep.test.js 5 tests for the accumulator
-```
-
-### The loop
-
-```js
-accumulator += dt;
-while (accumulator >= game.interval && game.status === 'running') {
-  accumulator -= game.interval;
-  game.step();
-}
-const alpha = accumulator / game.interval; // 0..1 between two cells
-renderer.render(game, alpha, now);
-```
-
-The simulation advances on whole cells; the renderer draws between the previous and current cell using `alpha`. That is why the snake glides instead of hopping, and why eating food can speed the game up without breaking anything.
-
-### Why the rules live apart
-
-`SnakeGame` exposes `step()`, `queueDirection()`, `drainEvents()`. The renderer only reads. That split is what makes the tests possible — they assert collision, growth, buffering and the speed floor without a browser.
-
-## Development
-
-```bash
-node --test          # run the suite
-node --test --watch  # watch mode
-```
-
-`tools/preview.html` is a screenshot harness that renders a mid-game board with a fixed seed — it is what regenerates `docs/preview.png`.
-
-## 中文说明
-
-一个零依赖的贪吃蛇：没有构建步骤、没有框架，打开即可玩。
-
-- **规则与渲染分离**：`js/game.js` 是纯状态机，不碰 DOM，因此可以被完整单元测试。
-- **固定步长 + 插值渲染**：逻辑按整格推进，画面在两格之间插值，所以蛇是滑行而不是跳格；加速也不会让模拟跑偏。
-- **输入缓冲**：最多缓存两次转向，快速连按不会丢指令，反向输入会被拒绝。
-
-本地运行需要起一个静态服务器（ES 模块不支持 `file://`）：
-
-```bash
-python -m http.server 8123
-```
+调试 Service Worker：访问 `?sw=off` 会注销 SW 并清空缓存。
 
 ## License
 

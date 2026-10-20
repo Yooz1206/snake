@@ -137,6 +137,14 @@ export class Renderer {
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
     ctx.fill();
 
+    // R6.6: the food carries a ring as well as a colour, so the board still
+    // reads when colour is unavailable.
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = Math.max(1.5, cell * 0.06);
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 1.6, 0, Math.PI * 2);
+    ctx.stroke();
+
     ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
     ctx.beginPath();
     ctx.arc(cx - radius * 0.3, cy - radius * 0.3, radius * 0.28, 0, Math.PI * 2);
