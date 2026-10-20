@@ -46,3 +46,4 @@ canvas{display:block;width:100%;aspect-ratio:1/1;touch-action:none}
 @media (max-width:420px){.overlay h1{font-size:28px}.hud__value{font-size:19px}#countdown-value{font-size:104px}}
 @media (max-height:620px){.app{gap:10px}.overlay__actions{margin-top:14px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}#countdown-value{animation:none}}
+@media (max-height:520px){.app{width:min(94vw,520px,calc(100dvh - 152px));min-width:200px;gap:8px}.overlay{padding:12px}.overlay h1{font-size:22px;margin-bottom:6px}#ov-sub{font-size:12px;line-height:1.4}.overlay__actions{margin-top:10px;gap:8px}.overlay__hint{margin-top:6px;font-size:11px}.foot{font-size:11px}}

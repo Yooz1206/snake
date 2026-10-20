@@ -90,7 +90,7 @@ node tools/device-check.mjs   # 设备矩阵：iPhone / Android / 320px、44px�
 
 ## 真机验证
 
-自动化到此为止：`tools/device-check.mjs` 是**仿真**（UA + 触控 + 视口），能证明布局、44px 和提示逻辑，但证明不了 Safari 分享面板、微信 WebView 降级、安全区与主屏启动。发布前按 [docs/device-checklist.md](docs/device-checklist.md) 走一遍实体设备。
+自动化到此为止：`tools/device-check.mjs` 是**仿真**（UA + 触控 + 视口），跑四套配置（iPhone 15 / Android / iPhone SE 320px / iPhone 横屏）共 16 条断言，能证明布局、44px、iOS 提示时机与横屏收缩；但证明不了 Safari 分享面板、微信 WebView 降级、安全区与主屏启动。发布前按 [docs/device-checklist.md](docs/device-checklist.md) 走一遍实体设备。
 
 ## 本地运行
 

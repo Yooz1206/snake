@@ -152,6 +152,20 @@ await layoutProbe('iphone-se-320');
 const titleSize = await evaluate('getComputedStyle(document.getElementById("ov-title")).fontSize');
 check('320px: overlay title steps down to 28px', titleSize, (v) => v === '28px', '28px');
 
+// --- iPhone in landscape (PRD 8.5: shrink, never force portrait) ----------
+await useDevice({ width: 844, height: 390, dpr: 3, mobile: true, userAgent: IPHONE, platform: 'iPhone' });
+await reload();
+
+const fits = await evaluate('document.querySelector(".app").getBoundingClientRect().bottom <= window.innerHeight + 1');
+check('landscape: the whole app fits the viewport height', fits, (v) => v === true, true);
+
+const stageRatio = await evaluate(`(() => {
+  const r = document.getElementById("stage").getBoundingClientRect();
+  return Math.round((r.width / r.height) * 100) / 100;
+})()`);
+check('landscape: the stage stays square', stageRatio, (v) => Math.abs(v - 1) < 0.02, '1.00');
+await layoutProbe('iphone15-landscape');
+
 socket.close();
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
