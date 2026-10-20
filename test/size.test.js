@@ -38,12 +38,11 @@ test('the share card stays out of the first paint', () => {
 });
 
 test('first paint does not grow past the v1.1 ceiling', () => {
-  // Regression guard. The PRD target is 42KB; this ceiling is the measured
-  // v1.1 size plus headroom, so accidental growth fails CI while the gap to
-  // the target is tracked below.
-  assert.ok(totalBytes < 72 * 1024, `first paint is ${kb(totalBytes)}, ceiling is 72KB`);
+  // Regression guard with a little headroom over the measured size, so an
+  // accidental import fails CI instead of quietly blowing the budget.
+  assert.ok(totalBytes < 44 * 1024, `first paint is ${kb(totalBytes)}, ceiling is 44KB`);
 });
 
-test('first paint meets the PRD 42KB budget', { todo: 'v1.1 ships ~66KB raw / ~20KB gzip: see README · Performance' }, () => {
+test('first paint meets the PRD 42KB budget', () => {
   assert.ok(totalBytes <= 42 * 1024, `first paint is ${kb(totalBytes)} of 42KB`);
 });

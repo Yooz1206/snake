@@ -1,77 +1,59 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Snake · 每日一局</title>
-  <meta name="description" content="零依赖的贪吃蛇：每天同一开局，三次机会，离线可玩。No tracking, no backend.">
-  <meta name="theme-color" content="#0a0d12">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="assets/icon-192.png">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0d12'/%3E%3Cpath d='M18 42h10a7 7 0 0 0 0-14h-4' stroke='%237cffb2' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='44' cy='42' r='5' fill='%23ff8a5b'/%3E%3C/svg%3E">
-
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Snake · 每日一局">
-  <meta property="og:description" content="每天同一开局，三次机会。零依赖、无追踪、离线可玩。">
-  <meta property="og:image" content="https://yooo1206.github.io/snake/assets/og.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://yooo1206.github.io/snake/">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Snake · 每日一局">
-  <meta name="twitter:description" content="每天同一开局，三次机会。零依赖、无追踪、离线可玩。">
-  <meta name="twitter:image" content="https://yooo1206.github.io/snake/assets/og.png">
-
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Snake · 每日一局</title>
+<meta name="description" content="零依赖的贪吃蛇：每天同一开局，三次机会，离线可玩。">
+<meta name="theme-color" content="#0a0d12">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="icon" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Snake · 每日一局">
+<meta property="og:description" content="每天同一开局，三次机会。零依赖、无追踪、离线可玩。">
+<meta property="og:image" content="https://yooo1206.github.io/snake/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://yooo1206.github.io/snake/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Snake · 每日一局">
+<meta name="twitter:description" content="每天同一开局，三次机会。零依赖、无追踪、离线可玩。">
+<meta name="twitter:image" content="https://yooo1206.github.io/snake/assets/og.png">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <main class="app">
-    <header class="hud">
-      <div class="hud__stat">
-        <span class="hud__label">Score</span>
-        <span class="hud__value" id="score">0</span>
-      </div>
-      <div class="hud__brand" id="brand" aria-hidden="true">DAILY</div>
-      <div class="hud__stat hud__stat--end">
-        <span class="hud__label">Best</span>
-        <span class="hud__value" id="best">0</span>
-      </div>
-    </header>
-
-    <section class="stage" id="stage">
-      <canvas id="game" width="640" height="640" aria-label="贪吃蛇游戏区域，方向键或滑动控制" role="img"></canvas>
-
-      <div class="overlay" id="overlay" data-state="ready" role="dialog" aria-modal="true" aria-labelledby="ov-title">
-        <div class="overlay__card">
-          <h1 id="ov-title">每日挑战</h1>
-          <p id="ov-sub">同一开局 · 今日剩 3 次</p>
-
-          <div class="overlay__actions">
-            <button type="button" class="btn" id="ov-action">开始今日挑战</button>
-            <button type="button" class="btn btn--ghost" id="ov-secondary" hidden>练习模式</button>
-            <button type="button" class="btn btn--ghost" id="ov-quit" hidden>结束本局</button>
-          </div>
-
-          <p class="overlay__hint" id="ov-hint"></p>
-          <div class="countdown" id="countdown" hidden aria-hidden="true"><span id="countdown-value">3</span></div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="foot">
-      <button type="button" class="icon-btn" id="mute" aria-label="切换音效" aria-pressed="false">🔊</button>
-      <span class="foot__hint" id="foot-hint">剩 3 次 · 连续 0 天</span>
-      <span class="foot__tip" id="ios-tip" hidden>分享 → 添加到主屏幕，离线可玩</span>
-    </footer>
-
-    <p class="sr-only" id="live" role="status" aria-live="polite"></p>
-    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-
-    <noscript>
-      <p class="noscript">这个游戏需要启用 JavaScript。</p>
-    </noscript>
-  </main>
-
-  <script type="module" src="js/main.js"></script>
+<main class="app">
+<header class="hud">
+<div class="hud__stat"><span class="hud__label">Score</span><span class="hud__value" id="score">0</span></div>
+<div class="hud__brand" id="brand" aria-hidden="true">DAILY</div>
+<div class="hud__stat hud__stat--end"><span class="hud__label">Best</span><span class="hud__value" id="best">0</span></div>
+</header>
+<section class="stage" id="stage">
+<canvas id="game" width="640" height="640" aria-label="贪吃蛇游戏区域，方向键或滑动控制" role="img"></canvas>
+<div class="overlay" id="overlay" data-state="ready" role="dialog" aria-modal="true" aria-labelledby="ov-title">
+<div class="overlay__card">
+<h1 id="ov-title">每日挑战</h1>
+<p id="ov-sub">同一开局 · 今日剩 3 次</p>
+<div class="overlay__actions">
+<button type="button" class="btn" id="ov-action">开始今日挑战</button>
+<button type="button" class="btn btn--ghost" id="ov-secondary" hidden>练习模式</button>
+<button type="button" class="btn btn--ghost" id="ov-quit" hidden>结束本局</button>
+</div>
+<p class="overlay__hint" id="ov-hint"></p>
+<div class="countdown" id="countdown" hidden aria-hidden="true"><span id="countdown-value">3</span></div>
+</div>
+</div>
+</section>
+<footer class="foot">
+<button type="button" class="icon-btn" id="mute" aria-label="切换音效" aria-pressed="false">🔊</button>
+<span class="foot__hint" id="foot-hint">剩 3 次</span>
+<span class="foot__tip" id="ios-tip" hidden>分享 → 添加到主屏幕，离线可玩</span>
+</footer>
+<p class="sr-only" id="live" role="status" aria-live="polite"></p>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<noscript><p class="noscript">这个游戏需要启用 JavaScript。</p></noscript>
+</main>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>

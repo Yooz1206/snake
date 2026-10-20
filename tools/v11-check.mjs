@@ -155,6 +155,28 @@ await send('Network.emulateNetworkConditions', {
   offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1,
 });
 
+// A death must settle the daily record even though the daily module loads
+// after the first paint. Steering straight into a wall takes ~2s.
+await evaluate('localStorage.clear()');
+await send('Page.reload');
+await sleep(1200);
+await key(' ', 'Space', 32);
+await sleep(300);
+await key('ArrowUp', 'ArrowUp', 38);
+await sleep(3200);
+
+const settled = await evaluate(`(() => {
+  const key = Object.keys(localStorage).find((k) => k.startsWith('snake:daily:v1:'));
+  return key ? localStorage.getItem(key) : null;
+})()`);
+check('a death decrements the daily attempts', settled, (v) => {
+  try {
+    return v !== null && JSON.parse(v).attemptsLeft === 2 && JSON.parse(v).runs === 1;
+  } catch {
+    return false;
+  }
+}, 'attemptsLeft 2, runs 1');
+
 // R6.2: every clickable target must be at least 44x44 CSS px.
 const targetsRect = await evaluate(`JSON.stringify([...document.querySelectorAll('button')]
   .filter((b) => !b.hidden)

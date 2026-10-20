@@ -74,11 +74,11 @@ node tools/device-check.mjs   # 设备矩阵：iPhone / Android / 320px、44px�
 
 | 指标 | 目标 | 现状 |
 | :-- | :-- | :-- |
-| 首屏 HTML+CSS+JS | ≤ 42KB | **66KB（未压缩）/ 20KB gzip**——未达标，见下 |
+| 首屏 HTML+CSS+JS | ≤ 42KB | **40.0KB（未压缩）/ 12.7KB gzip** |
 | 第三方请求 | 0 | 0 |
 | 首屏字体 | 0 | 0 |
 
-首屏超预算 24KB：v1.0 基线 29.8KB，v1.1 新增 7 个模块后为 66KB。`test/size.test.js` 里这条 PRD 断言以 `todo` 标记（不阻断 CI），另有 72KB 回归上限防止继续增长。要真正回到 42KB，需要压缩 `main.js`/`daily.js` 的体量或把每日状态加载移出首屏——这是 v1.1 的已知缺口，不是已解决的问题。
+首屏只包含绘制第一帧真正需要的九个文件：`index.html`、`style.css`、`main`、`game`、`renderer`、`input`、`timestep`、`config`、`rng`。**每日状态、音效、Service Worker、iOS 判定、分享卡**都用动态 `import()` 在首帧之后加载——它们分别只影响次数/天数文案、声音、离线与分享，不参与第一屏的绘制。`test/size.test.js` 会走一遍静态 import 图，超过 42KB 直接让 CI 失败。
 
 ## 可访问性（诚实边界）
 
