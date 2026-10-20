@@ -3,13 +3,19 @@ import { DIRECTIONS } from './config.js';
 /**
  * Pure game state and rules. No DOM, no canvas, no timers — which makes the
  * whole thing unit-testable and keeps the render layer honest.
+ *
+ * The random source is injected so the daily challenge can replay the same
+ * board from a date seed (PRD 10.1).
  */
 export class SnakeGame {
   /**
    * @param {typeof import('./config.js').CONFIG} config
+   * @param {() => number} rng uniform random in [0, 1)
    */
-  constructor(config) {
+  constructor(config, rng = Math.random) {
     this.config = config;
+    this.rng = typeof rng === 'function' ? rng : Math.random;
+    this.runDate = null;
     this.reset();
   }
 
@@ -28,6 +34,7 @@ export class SnakeGame {
     this.interval = baseInterval;
     this.status = 'ready';
     this.food = this.spawnFood();
+    this.restartArmedAt = null;
     this.events = [];
   }
 
@@ -52,7 +59,7 @@ export class SnakeGame {
     }
 
     if (free.length === 0) return null;
-    return free[Math.floor(Math.random() * free.length)];
+    return free[Math.floor(this.rng() * free.length)];
   }
 
   /**
@@ -80,11 +87,21 @@ export class SnakeGame {
     return true;
   }
 
+  /**
+   * Attribute the coming run to a local calendar day. It does not change the
+   * starting state — the seed already did that when the game was built.
+   *
+   * @param {string} runDate `YYYY-MM-DD`
+   */
+  startDaily(runDate) {
+    this.runDate = runDate;
+  }
+
   start() {
     if (this.status === 'ready') {
       this.status = 'running';
       this.events.push({ type: 'start' });
-    } else if (this.status === 'over') {
+    } else if (this.status === 'over' || this.status === 'won') {
       this.restart();
     }
   }
@@ -95,6 +112,55 @@ export class SnakeGame {
 
   resume() {
     if (this.status === 'paused') this.status = 'running';
+  }
+
+  /** After an automatic pause the sim waits behind a 3-2-1 countdown. */
+  beginCountdown() {
+    if (this.status === 'paused') this.status = 'countdown';
+  }
+
+  endCountdown() {
+    if (this.status === 'countdown') this.status = 'running';
+  }
+
+  /** End the run deliberately; the caller decides how to settle the score. */
+  quit() {
+    if (this.status === 'ready' || this.status === 'over' || this.status === 'won') return;
+    this.status = 'over';
+    this.events.push({ type: 'die', reason: 'quit' });
+  }
+
+  /**
+   * `R` is a two-press action (R4.3): the first press pauses, a second press
+   * within `restartGuardMs` restarts. Daily runs never restart this way, and
+   * a late second press re-arms the guard instead of throwing the run away.
+   *
+   * @param {number} now milliseconds, caller's clock
+   * @param {boolean} isDaily
+   * @returns {'paused'|'restarted'|'ignored'}
+   */
+  pressRestart(now, isDaily = false) {
+    if (this.status === 'running') {
+      this.status = 'paused';
+      this.restartArmedAt = now;
+      return 'paused';
+    }
+
+    if (this.status === 'paused') {
+      if (isDaily) return 'paused';
+
+      const armed = typeof this.restartArmedAt === 'number' ? this.restartArmedAt : -Infinity;
+      if (now - armed <= this.config.restartGuardMs) {
+        this.restart();
+        this.restartArmedAt = null;
+        return 'restarted';
+      }
+
+      this.restartArmedAt = now;
+      return 'paused';
+    }
+
+    return 'ignored';
   }
 
   restart() {
@@ -142,6 +208,11 @@ export class SnakeGame {
       );
       this.food = this.spawnFood();
       this.events.push({ type: 'eat', at: { ...next } });
+
+      if (this.food === null) {
+        this.status = 'won';
+        this.events.push({ type: 'win' });
+      }
     }
   }
 

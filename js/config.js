@@ -25,6 +25,40 @@ export const CONFIG = Object.freeze({
   /** How many direction changes may be buffered ahead. */
   maxInputQueue: 2,
 
+  /** A second restart press inside this window restarts the run. */
+  restartGuardMs: 2000,
+
+  /** Debounce for the window blur pause. */
+  blurDebounceMs: 100,
+
+  /** Leaving the tab during the countdown more than this many times ends the run. */
+  countdownLeaveLimit: 3,
+
+  /** Daily challenge rules (PRD §7.1). */
+  daily: Object.freeze({
+    attempts: 3,
+    keepDays: 7,
+    seedPrefix: 'snake:v1:',
+    minScoreForStreak: 10,
+  }),
+
+  /** 3-2-1 resume countdown (PRD 7.0.2). */
+  countdown: Object.freeze({
+    seconds: 3,
+    stepMs: 400,
+  }),
+
+  /** Share card size (PRD R2.3). */
+  share: Object.freeze({
+    width: 1080,
+    height: 1350,
+  }),
+
+  /** Service worker cache name; bump with the release (PRD 10.5). */
+  pwa: Object.freeze({
+    cache: 'snake-v1.1.0',
+  }),
+
   /** Board colours, used by the renderer. */
   palette: Object.freeze({
     background: '#0a0d12',
