@@ -26,6 +26,7 @@ const PRECACHE = [
   'js/copy.js',
   'js/controls.js',
   'js/theme.js',
+  'js/ios.js',
   'js/pwa.js',
   'manifest.webmanifest',
   'assets/icon-192.png',

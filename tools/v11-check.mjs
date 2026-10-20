@@ -88,6 +88,17 @@ function check(name, actual, predicate, expected) {
 await send('Page.enable');
 await send('Runtime.enable');
 
+// Drop any previously registered service worker: a stale shell would serve
+// the old modules and quietly invalidate every check below.
+await evaluate(`(async () => {
+  try {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+    const keys = await caches.keys();
+    await Promise.all(keys.map((key) => caches.delete(key)));
+  } catch {}
+})()`, true);
+
 // Fresh state: no daily record, no seen flag.
 await evaluate('localStorage.clear()');
 await send('Page.reload');

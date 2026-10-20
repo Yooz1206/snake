@@ -49,6 +49,7 @@ js/daily.js            每日状态、次数、连续天数、7 天清理、损�
 js/copy.js             界面文案（对照 PRD §8.2）
 js/controls.js         失焦防抖、倒计时次数上限、倒计时数值
 js/share.js            战绩卡绘制 + Web Share / 下载 / 复制（动态加载）
+js/ios.js              iOS 安装提示的判定（7 天后、一次、standalone 不出现）
 js/pwa.js              SW 注册、更新提示、?sw=off
 js/renderer.js         canvas 绘制、插值、粒子、震屏
 js/audio.js            WebAudio 合成音效
@@ -60,9 +61,11 @@ js/main.js             胶水层：循环、HUD、模式、overlay
 ## 测试
 
 ```bash
-node --test              # 62 项：单元 + 尺寸预算
+node --test              # 67 项：单元 + 尺寸预算
 python -m http.server 8123
-node tools/cdp-check.mjs # 真浏览器冒烟（需 Chrome 以 --remote-debugging-port=9333 启动）
+chrome --headless=new --remote-debugging-port=9333 http://127.0.0.1:8123/
+node tools/v11-check.mjs      # 真浏览器：状态机、倒计时、分享卡、离线重载
+node tools/device-check.mjs   # 设备矩阵：iPhone / Android / 320px、44px、iOS 提示
 ```
 
 单测覆盖：种子确定性、同种子同输入逐步一致、不同日期分叉、次数扣减与钳制、连续天数四种情况、损坏 JSON 恢复、7 天清理、`won` 状态、倒计时期间不推进、重开保护两次按压、分享文案与降级链、对比度 ≥4.5:1、首屏体积。
@@ -82,6 +85,12 @@ node tools/cdp-check.mjs # 真浏览器冒烟（需 Chrome 以 --remote-debuggin
 做到：小字对比度 ≥4.5:1（`--muted` 已改为 `#7a8796`）、所有可点元素 ≥44×44、仅键盘可完成开始/暂停/继续/重开/静音、焦点可见、`aria-live` 播报开始/破纪录/结束/剩余次数、`prefers-reduced-motion` 全面生效。
 
 **不承诺**：贪吃蛇是空间视觉游戏，v1.1 不做「屏幕阅读器完整可玩」。承诺的是状态可听、流程可键盘完成、对比度与触控达标。
+
+**iOS 安装**：Safari 没有 `beforeinstallprompt`，所以不做自定义弹窗；首次访问满 7 天后，ready 态页脚出现一行「分享 → 添加到主屏幕，离线可玩」，只出现一次（`snake:iosTipSeen:v1`），主屏启动（standalone）时不出现。
+
+## 真机验证
+
+自动化到此为止：`tools/device-check.mjs` 是**仿真**（UA + 触控 + 视口），能证明布局、44px 和提示逻辑，但证明不了 Safari 分享面板、微信 WebView 降级、安全区与主屏启动。发布前按 [docs/device-checklist.md](docs/device-checklist.md) 走一遍实体设备。
 
 ## 本地运行
 

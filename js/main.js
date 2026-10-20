@@ -27,6 +27,7 @@ import {
 } from './copy.js';
 import { shouldPauseOnBlur, countdownLeavesExceeded, countdownValue } from './controls.js';
 import { registerServiceWorker } from './pwa.js';
+import { shouldShowIosTip, IOS_TIP_TEXT } from './ios.js';
 
 /* --------------------------------------------------------------- elements */
 
@@ -140,6 +141,72 @@ function markSeen() {
   } catch {
     // Non-fatal: the player just sees the intro again next time.
   }
+}
+
+/* --------------------------------------------------------------- ios hint */
+
+function firstSeenAt() {
+  try {
+    const stored = Number(storage?.getItem(FIRST_SEEN_KEY));
+    if (Number.isFinite(stored) && stored > 0) return stored;
+
+    const now = Date.now();
+    storage?.setItem(FIRST_SEEN_KEY, String(now));
+    return now;
+  } catch {
+    return null;
+  }
+}
+
+const firstSeen = firstSeenAt();
+
+function iosTipDue() {
+  let seen = false;
+  try {
+    seen = storage?.getItem(IOS_TIP_KEY) === '1';
+  } catch {
+    seen = true; // Never nag when we cannot remember that we already did.
+  }
+
+  const standalone = navigator.standalone === true
+    || window.matchMedia?.('(display-mode: standalone)').matches === true;
+
+  return shouldShowIosTip({
+    userAgent: navigator.userAgent,
+    maxTouchPoints: navigator.maxTouchPoints ?? 0,
+    standalone,
+    firstSeenAt: firstSeen,
+    now: Date.now(),
+    seen,
+  });
+}
+
+let iosTipShown = false;
+
+function syncIosTip() {
+  if (game.status !== 'ready') {
+    ui.iosTip.hidden = true;
+    return;
+  }
+
+  // Decide once per page load: asking again after we recorded "seen" would
+  // hide the line a frame after showing it.
+  if (!iosTipShown) {
+    if (!iosTipDue()) {
+      ui.iosTip.hidden = true;
+      return;
+    }
+
+    iosTipShown = true;
+    ui.iosTip.textContent = IOS_TIP_TEXT;
+    try {
+      storage?.setItem(IOS_TIP_KEY, '1');
+    } catch {
+      // One nag per session is still better than none.
+    }
+  }
+
+  ui.iosTip.hidden = false;
 }
 
 function newGame(which) {
@@ -303,6 +370,8 @@ function setButton(button, label, visible = true) {
 }
 
 function renderOverlay(force = false) {
+  syncIosTip();
+
   if (!force && game.status === lastStatus && game.status === 'running') return;
   lastStatus = game.status;
 

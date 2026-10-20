@@ -59,6 +59,12 @@ export const CONFIG = Object.freeze({
     cache: 'snake-v1.1.0',
   }),
 
+  /** iOS has no install prompt; show one quiet footer line this many days
+   *  after the first visit (R3.10). */
+  iosTip: Object.freeze({
+    days: 7,
+  }),
+
   /** Board colours, used by the renderer. */
   palette: Object.freeze({
     background: '#0a0d12',
